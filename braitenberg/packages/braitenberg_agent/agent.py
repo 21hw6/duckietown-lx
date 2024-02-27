@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import math
+import time
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
@@ -25,7 +26,7 @@ from solution.preprocessing import preprocess
 # TODO edit this Config class ! Play with different gain and const values
 @dataclass
 class BraitenbergAgentConfig:
-    gain: float = 0.03
+    gain: float = 0.07
     const: float = 0.3
 
 
