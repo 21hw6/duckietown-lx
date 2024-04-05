@@ -46,14 +46,30 @@ def detect_lane_markings(image: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     h, w, _ = image.shape
 
-    imgrgb = cv2.cvtColor(imgbgr, cv2.COLOR_BGR2RGB)
+    imgrgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    imghsv = cv2.cvtColor(imgbgr, cv2.COLOR_BGR2HSV)
+    imghsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    img = cv2.cvtColor(imgbgr, cv2.COLOR_BGR2GRAY)
+    img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    H = np.array([-4.137917960301845e-05, -0.00011445854191468058, -0.1595567007347241, 
+              0.0008382870319844166, -4.141689222457687e-05, -0.2518201638170328, 
+              -0.00023561657746150284, -0.005370140574116084, 0.9999999999999999])
+
+    H = np.reshape(H,(3, 3))
+    Hinv = np.linalg.inv(H)
+
+    points = Hinv @ np.array([400, 0, 1])
+
+    horizon = int(points[1]/points[2])
+
+    mask_ground = np.ones(img.shape, dtype=np.uint8) # TODO: CHANGE ME
+
+    # Mask out everything above our horizon line
+    mask_ground[:horizon, :] = 0
 
     # TODO: Identify a setting for the standard deviation that removes noise while not eliminating too much valid content.
-    sigma = 2.5 # CHANGE ME
+    sigma = 2 # CHANGE ME
 
     # Smooth the image using a Gaussian kernel
     img_gaussian_filter = cv2.GaussianBlur(img,(0,0), sigma)
@@ -73,9 +89,9 @@ def detect_lane_markings(image: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     mask_mag = (Gmag > threshold)
 
     white_lower_hsv = np.array([0, 0, 150])
-    white_upper_hsv = np.array([179, 45, 255])
-    yellow_lower_hsv = np.array([20, 115, 166]) #[0, 100, 100]
-    yellow_upper_hsv = np.array([28, 255, 240]) #[50, 255, 255]
+    white_upper_hsv = np.array([190, 50, 255])
+    yellow_lower_hsv = np.array([0, 100, 100]) #[0, 100, 100]
+    yellow_upper_hsv = np.array([50, 255, 255]) #[50, 255, 255]
 
     mask_white = cv2.inRange(imghsv, white_lower_hsv, white_upper_hsv)
     mask_yellow = cv2.inRange(imghsv, yellow_lower_hsv, yellow_upper_hsv)
